@@ -1,0 +1,39 @@
+project: mnist-HP-tuning-final
+method: bayes
+program: train_mnist.py
+
+metric:
+  name: val_accuracy
+  goal: maximize
+
+parameters:
+  seed:
+    value: 1337
+  max_epochs:
+    value: 20
+
+  optimizer:
+    values: ["adam", "adamw", "sgd"]
+
+  learning_rate:
+    distribution: log_uniform_values
+    min: 0.0001
+    max: 0.1
+
+  batch_size:
+    values: [32, 64, 128]
+
+  dropout:
+    distribution: uniform
+    min: 0.0
+    max: 0.5
+
+  weight_decay:
+    values: [0.0, 0.000001, 0.000005, 0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01]
+
+
+  lr_scheduler:
+    values: ["none"]
+
+  augmentation:
+    values: ["none"]

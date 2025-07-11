@@ -1,0 +1,30 @@
+project: cifar10-HP-tuning-final
+method: bayes 
+program: train_cifar10.py
+
+metric:
+  name: val_accuracy
+  goal: maximize
+
+parameters:
+  seed:
+    value: 1337
+  max_epochs:
+    value: 20
+
+  optimizer:
+    values: ["adam", "adamw", "sgd"]
+
+  learning_rate:
+    distribution: log_uniform_values
+    min: 0.0001
+    max: 0.1
+
+  batch_size:
+    values: [32, 64, 128]
+
+  lr_scheduler:
+    values: ["none"]
+
+  augmentation:
+    values: ["none"]
