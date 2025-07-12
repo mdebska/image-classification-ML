@@ -36,37 +36,43 @@ set_seed(config.seed)
 # mean & std
 mean, std = [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
 
-# augmentation
+# augmentation (improved with RandomErasing)
 aug = config.augmentation if hasattr(config, "augmentation") else "none"
-if config.augmentation == "basic":
+
+if aug == "basic":
     train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
         transforms.Resize((224, 224)),
+        transforms.RandomCrop(224, padding=4),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(mean, std)
+        transforms.Normalize(mean, std),
+        transforms.RandomErasing(p=0.2)  # added
     ])
-elif config.augmentation == "color":
+elif aug == "color":
     train_transform = transforms.Compose([
+        transforms.Resize((224, 224)),
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
         transforms.RandomHorizontalFlip(),
-        transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize(mean, std)
+        transforms.Normalize(mean, std),
+        transforms.RandomErasing(p=0.2)  # added
     ])
-elif config.augmentation == "affine":
+elif aug == "affine":
     train_transform = transforms.Compose([
+        transforms.Resize((224, 224)),
         transforms.RandomAffine(degrees=15, translate=(0.1, 0.1)),
-        transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize(mean, std)
+        transforms.Normalize(mean, std),
+        transforms.RandomErasing(p=0.2)  # added
     ])
-else:
+else:  # "none"
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize(mean, std)
+        transforms.Normalize(mean, std),
+        transforms.RandomErasing(p=0.2)  # added (still helps generalization)
     ])
+
 
 # Data transforms
 transform = transforms.Compose([
@@ -137,6 +143,13 @@ if hasattr(config, "lr_scheduler"):
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=config.max_epochs)
     elif config.lr_scheduler == "plateau":
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=2)
+    elif config.lr_scheduler == "onecycle":
+        scheduler = optim.lr_scheduler.OneCycleLR(
+            optimizer,
+            max_lr=config.learning_rate,
+            steps_per_epoch=len(train_loader),
+            epochs=config.max_epochs
+        )
     else:
         scheduler = None
 else:
