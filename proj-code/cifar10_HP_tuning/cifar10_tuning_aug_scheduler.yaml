@@ -6,6 +6,10 @@ metric:
   name: val_accuracy
   goal: maximize
 
+early_terminate:
+  type: hyperband
+  min_iter: 15
+
 parameters:
   seed:
     value: 1337
@@ -14,10 +18,15 @@ parameters:
 
   optimizer:
     values: ["adam", "adamw", "sgd"]
-
+  
   learning_rate:
     distribution: log_uniform_values
     min: 0.0001
+    max: 0.01
+
+  learning_rate_sgd:
+    distribution: log_uniform_values
+    min: 0.01
     max: 0.2
 
   batch_size:
@@ -36,3 +45,5 @@ parameters:
 
   augmentation:
     values: ["none", "basic", "affine", "color"]
+  
+
